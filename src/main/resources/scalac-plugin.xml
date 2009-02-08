@@ -1,0 +1,4 @@
+<plugin>
+  <name>private-setters</name>
+  <classname>scala.osgi.compiler.OsgiPlugin</classname>
+</plugin>
