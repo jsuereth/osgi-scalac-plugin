@@ -4,6 +4,10 @@ import tools.nsc.plugins._
 import tools.nsc.backend.icode._
 import tools.nsc._
 import manifest._
+
+/** 
+ * This plugin is used to enforce that only exported packages of other modules can be imported!
+ */
 class OsgiPlugin(val global : Global) extends Plugin {
   val name = "privateSetter"
   val description = "allows vars to have private setters"
@@ -72,12 +76,8 @@ class OsgiPlugin(val global : Global) extends Plugin {
         } {
           //Add 'generated' packages to acceptable package imports
           val pkg = getPackageFor(icodeClass.symbol)
-          Console.println("Adding package: " + pkg + " to approved import list")
           allowedImports = collection.immutable.HashSet(pkg) ++ allowedImports    
-          Console.println("Approved Packages now = ")
           allowedImports.foreach(Console.println)
-          
-          Console.println("is recently added package found? = " + allowedImports.contains(pkg))
           ()
         }
         //TODO - Step two -> Add acceptable imports form current java source
@@ -94,16 +94,19 @@ class OsgiPlugin(val global : Global) extends Plugin {
             for(local <- method.locals) {                
               enforceSymbolReferenceAllowed(local.sym, unit)
             }
-            //Check blocks for static references
-            /*for(block <- method.code.blocks;
-                insn <- block) {
-              for(consumed <- insn.consumedTypes) {
-                enforceSymbolReferenceAllowed(consumed.toType.typeSymbolDirect, unit)                
-              }
-              for(produced <- insn.producedTypes) {
-                enforceSymbolReferenceAllowed(produced.toType.typeSymbolDirect, unit)
-              }
-            }*/
+            //Check blocks for method calls, or new instantiation of invalid packages...
+            import global.icodes.opcodes._
+            for { 
+              block <- method.code.blocks 
+              insn <- block
+            } insn match {
+              case CALL_METHOD(symbol,_) =>
+                enforceSymbolReferenceAllowed(symbol, unit)
+              case NEW(kind) =>
+                enforceSymbolReferenceAllowed(kind.cls, unit)                
+              case _ =>
+                //Ignore all other icode instructions!
+            }
           }
         }
         
