@@ -30,7 +30,11 @@ class OsgiPlugin(val global : Global) extends Plugin {
   
 
   
-  
+  /**
+   * This plugin makes sure that all referenced packages in the generated source of this compilation 
+   * *could* be implemented in our OSGi manifest.   It does *not* enforce that things *are* imported
+   * by our manifest
+   */
   private object ImportChecker extends PluginComponent {
     val global = OsgiPlugin.this.global
     val runsAfter = "icode"
@@ -51,7 +55,7 @@ class OsgiPlugin(val global : Global) extends Plugin {
 	    //TOOD - are there others we should ignore?
 	    name.startsWith("java") || allowedImports.contains(name ) || name.equals("")
 	  }
-	  /** Returns the . seperated package containing (or that is) a symbol */
+	  /** Returns the . seperated package containing a symbol (or the symbol itself, if it is a package) */
       def getPackageFor(symbol:global.Symbol) = if(symbol.isPackage) {
         symbol.fullNameString('.')
       } else {
