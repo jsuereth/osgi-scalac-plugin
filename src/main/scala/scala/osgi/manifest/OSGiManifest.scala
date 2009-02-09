@@ -34,7 +34,8 @@ object OSGiManifestType {
  */
 class OSGiManifestImpl(manifest : Manifest) extends OSGIManifest  {
   /** Removes all ;xyz=  froma  given string*/
-  def removeQualifier(input : String) = input.takeWhile(_ != ';').mkString("")
+  //TODO - Implement
+  def removeQualifier(input : String) :String = input.replaceAll("""\s+""", "") //TODO - Remove ;xyz = for strings...
   
   
   override def getImportedPackages = {
