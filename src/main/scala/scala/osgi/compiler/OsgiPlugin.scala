@@ -44,17 +44,8 @@ class OsgiPlugin(val global : Global) extends Plugin {
 	   */
 	  def isReferenceAllowed(name : String) : Boolean = {
 	    Console.println("Checking: " + name + " for viable OSGi usage")
-	    def obtainPackageName(name : String) = {
-	      val idx = name.lastIndexOf('.')
-	      if(idx < 0) {
-	        ""
-	      } else {
-	        name.substring(0, idx)
-	      }
-	    }
-	    val pkgName = obtainPackageName(name)
 	    //TOOD - are there others we should ignore?
-	    pkgName.startsWith("java") || allowedImports.contains(pkgName ) || pkgName.equals("")
+	    name.startsWith("java") || allowedImports.contains(name ) || name.equals("")
 	  }
 	  /** Returns the . seperated package containing (or that is) a symbol */
       def getPackageFor(symbol:global.Symbol) = if(symbol.isPackage) {
@@ -85,6 +76,8 @@ class OsgiPlugin(val global : Global) extends Plugin {
           allowedImports = collection.immutable.HashSet(pkg) ++ allowedImports    
           Console.println("Approved Packages now = ")
           allowedImports.foreach(Console.println)
+          
+          Console.println("is recently added package found? = " + allowedImports.contains(pkg))
           ()
         }
         //TODO - Step two -> Add acceptable imports form current java source
